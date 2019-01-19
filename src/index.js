@@ -1,33 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-// const App = () => {
-
-//     window.navigator.geolocation.getCurrentPosition(
-//         (position) => console.log(position),
-//         (err) => console.log(err)
-//     );
-
-//     return <div>Hi There</div>
-
-// };
+import SeasonDisplay from './SeasonDisplay';
+import Spinner from './Spinner';
 
 class App extends React.Component {
 
-    // create and initialize object
-    constructor(props) {
-        // pass parent object (React.Component) methods and properties
-        super(props);
+    state = { lat: null, errorMessage: '' };
 
-        // initialze state
-        this.state = {
-            lat: null,
-            errorMessage: ''
-        };
-
-        console.log('hit');
-
+    // lifecycle method - best practice to do data loading here
+    componentDidMount(){
         window.navigator.geolocation.getCurrentPosition(
+            // updating state will re-render page running render()
             (position) => {
                 this.setState({ lat: position.coords.latitude });
             },
@@ -35,21 +18,29 @@ class App extends React.Component {
                 this.setState({errorMessage: err.message});
             }
         );
-
     }
 
-    // have to define render!!
-    render() {
-        
+    // function to keep conditionals out of the render method
+    renderContent() {
         if (this.state.errorMessage && !this.state.lat) {
             return <div>Error:{this.state.errorMessage}</div>
         }
 
         if (!this.state.errorMessage && this.state.lat) {
-            return <div>Latitude:{this.state.lat}</div>
+            return <SeasonDisplay lat={this.state.lat}/>
         }
         
-        return <div>Loading...</div>
+        return <Spinner message="please accept location request"/>
+    }
+
+    // have to define render!!
+    render() {
+        // try to keep one return in render
+        return (
+            <div className="wrapper-body">
+                {this.renderContent()}
+            </div>
+        );
 
     }
 
